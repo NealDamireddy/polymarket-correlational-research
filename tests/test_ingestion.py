@@ -82,3 +82,19 @@ def test_end_to_end_offline_replay(tmp_path, monkeypatch):
     assert manifest['analysis_rows'] > 0
     assert manifest['source_sha256']
     assert (output/'research_report.md').exists()
+
+
+@pytest.mark.parametrize('reverse',[False,True])
+def test_makeup_final_not_lost_after_postponed_entry(reverse):
+    class FakeClient:
+        def get(self,*args):
+            base = {'officialDate':'2015-05-06','gameType':'R','gamePk':414038}
+            final = {**base,'status':{'abstractGameState':'Final','codedGameState':'F'}}
+            postponed = {**base,'status':{'abstractGameState':'Final','codedGameState':'D'}}
+            versions = [postponed,final]
+            return {'dates':[{'date':'2015-05-06','games':list(reversed(versions)) if reverse else versions}]}
+    games, excluded = schedule(FakeClient(),'2015-05-01','2015-05-31')
+    assert len(games) == 1
+    assert games[0]['status']['codedGameState'] == 'F'
+    assert len(excluded)==1
+    assert excluded[0]['status']['codedGameState']=='D'

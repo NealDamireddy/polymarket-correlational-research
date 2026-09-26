@@ -168,7 +168,7 @@ Several relationships were not proven by the configured rules but were extremely
 
 These candidates are more interesting for future validation because they are not merely identical thresholds in disguise. They are also more dangerous to overinterpret: pooled historical association is not a guarantee, and the candidate list was selected from the same data used to estimate it.
 
-### The multi-guard discovery set is frozen, not validated
+### The frozen multi-guard set was tested on the next month
 
 The bounded April 2015 search evaluated and retained 1,034 one-to-three-guard structures under the prespecified screen:
 
@@ -181,7 +181,15 @@ The bounded April 2015 search evaluated and retained 1,034 one-to-three-guard st
 | Three guards | 618 |
 | Zero observed sporting leakage in training | 934 |
 
-The maximum training leakage among retained structures was about 0.146% of all player-game rows. This is a discovery result only. The candidate bundle is frozen specifically so a later chronological period can test it without silently replacing failed candidates. No later holdout dataset has been run in the committed artifacts yet.
+The maximum training leakage among retained structures was about 0.146% of all player-game rows. The frozen list was then evaluated without reselection on May 1–31, 2015: 428 games and 8,936 positive-PA player-games.
+
+- All 1,034 structures met the holdout support thresholds.
+- 1,012 of 1,034 met the original joint-conditional screen in holdout.
+- 356 of 378 partly empirical structures passed the holdout screen.
+- 212 empirical structures had at least one holdout guard failure when the anchor occurred.
+- All 656 mechanically exact structures remained exact under the matching data/scoring scope.
+
+This is encouraging short-horizon stability, not evidence of a priced edge. April and May are adjacent retrospective months, repeated players can appear in both, official statistics may have been revised later, and the counts contain many logically equivalent leg lists. Two months do not establish multi-season or point-in-time performance.
 
 ### Large lift is not the same as a safe leg
 
@@ -282,6 +290,9 @@ Key artifacts:
 - [`manifest.json`](outputs/2015-04-05_2015-04-30/manifest.json) — policy, exclusions, source hashes, retrieval times, and runtime versions.
 - [`frozen_candidates.json`](outputs/combo_april2015_frozen/frozen_candidates.json) — checksummed one-to-three-guard discovery set and training provenance.
 - [`train_combos.csv`](outputs/combo_april2015_frozen/train_combos.csv) — direct conjunction metrics for all 1,034 frozen structures.
+- [`Milestone 2 report`](outputs/combo_may2015_holdout/research_report.md) — April-frozen candidates evaluated on the May chronological holdout.
+- [`holdout_combos.csv`](outputs/combo_may2015_holdout/holdout_combos.csv) — every frozen candidate, including failures, in original training order.
+- [`milestone2.md`](docs/milestone2.md) — selection, integrity, uncertainty, and timing protocol.
 - [`polymarket_api.md`](docs/polymarket_api.md) — combo and pricing API boundaries.
 
 Raw and processed datasets remain local and are excluded from Git because they are large and reproducible from the cached-source workflow. The committed lockfile records the tested environment; `pyproject.toml` remains the portable dependency specification.
@@ -290,15 +301,43 @@ Raw and processed datasets remain local and are excluded from Git because they a
 
 The next phase should be prespecified before expanding the sample:
 
-1. Freeze a small candidate list from this discovery window.
-2. Expand to complete seasons and preserve a later chronological holdout.
-3. Measure season, player, and threshold stability with player/game-aware uncertainty.
+1. Extend the frozen protocol across complete seasons and untouched later-season holdouts.
+2. Measure season, player, and threshold stability with player/game-aware uncertainty.
+3. Collapse or label logically equivalent leg structures before interpreting candidate counts.
 4. Verify actual Polymarket US contract wording and same-player combo eligibility.
 5. Capture synchronized executable RFQs/books, quote expiry, size, and fees.
-6. Search at most three guards at first and compute the conjunction directly.
+6. Attach outcome-availability timestamps before any historical price backtest.
 7. Replay every outcome branch, including anchor failure, guard failure, voids, and partial fills.
 8. Stress every candidate by at least one tick before considering paper execution.
 
 ## Scope and disclaimer
 
 This repository is research software, not a trading system or a recommendation to bet. It contains no credentials, order-submission logic, or claimed profitable strategy. Historical box scores can contain later official corrections, and the current statistical intervals do not adjust for clustering, repeated searches, or selection. “No configured proof” also does not mean a relationship is nonlogical; the rule engine is intentionally conservative and incomplete.
+
+
+## Milestone 2: freeze first, evaluate later
+
+Use separate commands so candidate selection is complete before fetching or examining holdout outcomes:
+
+```bash
+python -m sports_dependency_engine.backtest.historical freeze \
+  --train data/processed/2015-04-05_2015-04-30/player_games.parquet \
+  --output outputs/my_april_frozen
+
+python main.py --start 2015-05-01 --end 2015-05-31
+
+python -m sports_dependency_engine.backtest.historical evaluate \
+  --frozen outputs/my_april_frozen/frozen_candidates.json \
+  --test data/processed/2015-05-01_2015-05-31/player_games.parquet \
+  --output outputs/my_may_holdout
+```
+
+Output directories must be new; existing frozen selections/results cannot be overwritten by these commands. The completed run is in `outputs/combo_april2015_frozen/` and `outputs/combo_may2015_holdout/`. The JSON bundle records training input hashes, code hashes, configuration, candidates, training metrics and pruning audit. Evaluation verifies bundle integrity, proof-semantics hashes, disjoint game IDs and strictly later dates. This is reproducibility metadata, not a tamper-proof public preregistration.
+
+Default discovery requires at least 100 anchor and 100 guard occurrences, pair conditional >= .99 and Wilson lower bound >= .95. Each anchor retains at most ten eligible guards, prioritizing proofs, lower bounds and support. Enumerate one to three guards and apply the same thresholds to the **joint** guard outcome, including joint guard support. A hard 5,000-evaluation budget raises an error rather than returning a truncated search. Caps are configurable and exclusions are logged. No tiny-support exact rules enter this candidate ranking.
+
+All frozen candidates appear in `holdout_combos.csv`, in training order: failures, insufficient support and zero-anchor cases are retained. `test_screen_pass` is a descriptive holdout flag, not a newly selected set. `P_guard` now refers to the whole guard conjunction. Leakage uses **all player-games** as denominator; conditional failure uses only anchor occurrences. Different leg lists can represent equivalent sporting events, so candidate counts do not measure independent discoveries.
+
+The CSV reports marginal Wilson intervals and reproducible percentile bootstrap intervals for whole-game and whole-player resampling separately. These are sensitivity checks, not a two-way cluster correction or multiplicity-adjusted inference. All-success empirical samples produce bootstrap [1, 1]; keep Wilson uncertainty and never treat that as proof. Zero-anchor bootstrap replicates are counted and omitted from conditional quantiles; all-zero support yields an undefined conditional.
+
+This evaluates later official game dates using final, potentially revised statistics. It does not reconstruct when outcomes became available, so it is not a point-in-time backtest. Suspended-game completion, scoring revisions, market participation and executable-price timing still need explicit handling. The initial April/May exercise is a pipeline and stability check; multi-season generalization remains untested.
