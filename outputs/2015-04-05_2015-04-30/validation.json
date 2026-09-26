@@ -1,0 +1,43 @@
+{
+  "rows": 8079,
+  "games": 327,
+  "players": 712,
+  "start": "2015-04-05",
+  "end": "2015-04-30",
+  "missing_by_column": {
+    "plate_appearances": 0,
+    "at_bats": 0,
+    "hits": 0,
+    "doubles": 0,
+    "triples": 0,
+    "home_runs": 0,
+    "runs": 0,
+    "RBI": 0,
+    "walks": 0,
+    "strikeouts": 0,
+    "stolen_bases": 0,
+    "singles": 0,
+    "total_bases": 0,
+    "hits_plus_runs_plus_RBI": 0,
+    "game_id": 0,
+    "date": 0,
+    "season": 0,
+    "player_id": 0,
+    "player_name": 0,
+    "team": 0,
+    "opponent": 0,
+    "home_away": 0,
+    "batting_order": 0,
+    "park": 0
+  },
+  "identity_violations": {
+    "hits_decomposition": 0,
+    "total_bases": 0,
+    "hrr": 0,
+    "hits_le_ab": 0,
+    "ab_le_pa": 0,
+    "hr_le_runs": 0,
+    "hr_le_rbi": 0
+  },
+  "zero_pa_rows": 1216
+}

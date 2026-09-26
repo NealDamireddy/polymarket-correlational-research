@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sports-dependency-engine"
+version = "0.1.0"
+description = "Auditable same-player sports-prop dependence research"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "pandas>=2.2", "pyarrow>=15", "requests>=2.31"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+statcast = ["pybaseball>=2.2.7"]
+notebooks = ["jupyterlab>=4"]
+
+[project.scripts]
+sports-dependency = "sports_dependency_engine.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
