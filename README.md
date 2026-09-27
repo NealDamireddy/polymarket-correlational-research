@@ -1,5 +1,7 @@
 # Polymarket Correlational Research
 
+**Start with [Research findings and reproducibility record](docs/FINDINGS.md)** for the consolidated methods, verified results, failures, data corrections, limitations, and reproduction commands. It is the ongoing findings record for this repository.
+
 An auditable research project investigating whether structural dependence between sports props can create a pricing edge in Polymarket combo markets.
 
 > **Bottom line:** the statistical and logical dependency search is feasible, reproducible, and produced meaningful candidates. This milestone did **not** establish an executable betting edge. No historical combo quotes were joined, no out-of-sample pricing backtest was run, and no orders were submitted.
@@ -189,7 +191,9 @@ The maximum training leakage among retained structures was about 0.146% of all p
 - 212 empirical structures had at least one holdout guard failure when the anchor occurred.
 - All 656 mechanically exact structures remained exact under the matching data/scoring scope.
 
-This is encouraging short-horizon stability, not evidence of a priced edge. April and May are adjacent retrospective months, repeated players can appear in both, official statistics may have been revised later, and the counts contain many logically equivalent leg lists. Two months do not establish multi-season or point-in-time performance.
+All 22 screen failures are overlapping leg-list variants of one underlying empirical condition: `total_bases >= 4 → H+R+RBI >= 3`. It recorded 788/791 successes in April (99.62%) and 1,035/1,047 in May (98.85%), falling below the original 99% screen. The 12 May failures are shared across those structures and must not be counted 22 times.
+
+This is encouraging short-horizon stability alongside a concrete example of empirical deterioration—not evidence of a priced edge. April and May are adjacent retrospective months, repeated players can appear in both, official statistics may have been revised later, and the counts contain many logically equivalent leg lists. Two months do not establish multi-season or point-in-time performance.
 
 ### Large lift is not the same as a safe leg
 
@@ -269,10 +273,10 @@ Use `--root PATH` to change the data/output root. `--min-anchor` and `--min-guar
 ```text
 src/sports_dependency_engine/
 ├── sports/mlb/       # ingestion, normalization, prop definitions, scoring rules
-├── dependency/       # proofs, pair search, metrics, future combo search
+├── dependency/       # proofs, pair/combo search, metrics
 ├── polymarket/       # read-only catalogs, books, prices, response parsing
 ├── reports/          # validation, ranking, and research reports
-└── backtest/         # explicit future extension points
+└── backtest/         # frozen chronological validation and cluster sensitivity
 
 notebooks/            # output-consuming walkthroughs; no unique research logic
 outputs/              # committed validation report, rankings, and manifests
@@ -312,7 +316,7 @@ The next phase should be prespecified before expanding the sample:
 
 ## Scope and disclaimer
 
-This repository is research software, not a trading system or a recommendation to bet. It contains no credentials, order-submission logic, or claimed profitable strategy. Historical box scores can contain later official corrections, and the current statistical intervals do not adjust for clustering, repeated searches, or selection. “No configured proof” also does not mean a relationship is nonlogical; the rule engine is intentionally conservative and incomplete.
+This repository is research software, not a trading system or a recommendation to bet. It contains no credentials, order-submission logic, or claimed profitable strategy. Historical box scores can contain later official corrections, and the marginal Wilson intervals do not adjust for clustering, repeated searches, or selection. Separate one-way game/player bootstrap sensitivity intervals are included for the May holdout; they do not provide a simultaneous multiway or post-selection guarantee. “No configured proof” also does not mean a relationship is nonlogical; the rule engine is intentionally conservative and incomplete.
 
 
 ## Milestone 2: freeze first, evaluate later
